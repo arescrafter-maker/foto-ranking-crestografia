@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archivio di stampa — vota le fotografie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #E7DFC9;
+    --paper: #FBF7EC;
+    --ink: #211F1A;
+    --pine: #33463A;
+    --pine-dim: #4a5f52;
+    --rust: #A85C32;
+    --muted: #8C8577;
+    --line: rgba(33,31,26,0.14);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    background-image: radial-gradient(circle at 1px 1px, rgba(33,31,26,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding: 32px 16px;
+  }
+  .stage{ width:100%; max-width: 720px; position: relative; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    display:flex; justify-content: space-between; margin-bottom: 10px;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight: 600; margin: 0 0 6px 0; letter-spacing: -0.01em; }
+  .card{
+    background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(33,31,26,0.05), 0 18px 40px -24px rgba(33,31,26,0.35);
+    padding: 34px;
+  }
+  p.lede{ color: var(--pine-dim); font-size: 15px; line-height:1.5; margin: 0 0 22px 0; }
+  label.field-label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  input[type="text"], input[type="password"]{
+    width:100%; font-family:'Fraunces', serif; font-size: 22px; padding: 12px 4px;
+    border:none; border-bottom: 2px solid var(--ink); background: transparent; color: var(--ink); outline: none;
+  }
+  input::placeholder{ color: rgba(33,31,26,0.3); }
+  .btn{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
+    padding: 13px 22px; border-radius: 2px; cursor:pointer; transition: transform .12s ease, background .12s ease;
+  }
+  .btn:hover{ background: var(--pine); border-color: var(--pine); }
+  .btn:active{ transform: translateY(1px); }
+  .btn.ghost{ background: transparent; color: var(--ink); }
+  .btn.ghost:hover{ background: rgba(33,31,26,0.06); }
+  .btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:12px; margin-top: 24px; }
+  .btn-row.spread{ justify-content: space-between; }
+  .link-btn{
+    background:none; border:none; padding:0; font-family:'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: underline; cursor: pointer;
+  }
+  .frame-wrap{
+    position:relative; border: 1px solid var(--line); background: #1c1a16; aspect-ratio: 3/2;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom: 20px;
+  }
+  .frame-wrap img{ width:100%; height:100%; object-fit: contain; background:#1c1a16; }
+  .frame-wrap .missing{ color:#8C8577; font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:center; padding:20px;}
+  .vote-block{ text-align:center; margin: 8px 0 6px 0; }
+  .vote-number{
+    font-family:'Fraunces', serif; font-weight: 600; font-size: 64px; color: var(--rust);
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .vote-number span{ font-size: 22px; color: var(--muted); margin-left:4px; }
+  input[type="range"]{
+    width: 100%; margin: 18px 0 4px 0; -webkit-appearance: none; height: 4px;
+    background: var(--line); border-radius: 2px; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background: var(--rust);
+    border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--rust); cursor:pointer; margin-top: -7px;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%; background: var(--rust); border: 3px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--rust); cursor:pointer;
+  }
+  .range-ends{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); }
+  .filmstrip{
+    display:flex; gap:6px; overflow-x:auto; padding: 16px 2px 4px 2px; margin-top: 22px;
+    border-top: 1px dashed var(--line);
+  }
+  .filmstrip::-webkit-scrollbar{ height:5px; }
+  .filmstrip::-webkit-scrollbar-thumb{ background: var(--line); border-radius:3px; }
+  .frame-thumb{
+    flex: 0 0 auto; width: 40px; height: 30px; background: #1c1a16 center/cover no-repeat;
+    border: 2px solid transparent; border-radius: 2px; cursor: pointer; position: relative; opacity: 0.55;
+  }
+  .frame-thumb.done{ opacity: 0.85; }
+  .frame-thumb.current{ border-color: var(--rust); opacity:1; }
+  .frame-thumb .dot{ position:absolute; top:2px; right:2px; width:5px; height:5px; border-radius:50%; background: var(--pine); }
+  .review-row{ display:flex; align-items:center; gap:14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .review-row:last-child{ border-bottom:none; }
+  .review-thumb{ width:64px; height:48px; object-fit:cover; background:#1c1a16; border-radius:2px; flex-shrink:0; }
+  .review-info{ flex:1; min-width:0; }
+  .review-title{ font-family:'Fraunces',serif; font-size:15px; }
+  .review-score{ font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--rust); width:44px; text-align:right; }
+  .review-edit-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;
+    color: var(--muted); background:none; border:1px solid var(--line); border-radius:2px; padding:6px 10px; cursor:pointer;
+  }
+  .review-edit-btn:hover{ border-color: var(--ink); color: var(--ink); }
+  .inline-editor{ width:100%; margin-top:10px; }
+  .banner{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.05em; color: var(--pine);
+    background: rgba(51,70,58,0.08); border:1px solid rgba(51,70,58,0.25); padding:10px 14px; border-radius:2px; margin-bottom:18px;
+  }
+  .banner.error{ color:#8a3324; background: rgba(168,92,50,0.1); border-color: rgba(168,92,50,0.35); }
+  table.stats{ width:100%; border-collapse: collapse; font-size: 14px; }
+  table.stats th{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.08em;
+    color: var(--muted); text-align:left; border-bottom: 1px solid var(--ink); padding: 6px 8px;
+  }
+  table.stats td{ padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle;}
+  table.stats img{ width:56px; height:40px; object-fit:cover; border-radius:2px; }
+  .rank-num{ font-family:'Fraunces',serif; font-size:18px; color: var(--rust); width: 30px; }
+  .voters-list{ font-family:'IBM Plex Mono',monospace; font-size:10px; color: var(--muted); }
+  textarea.csv{
+    width:100%; height:140px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    background: #1c1a16; color: #E7DFC9; border:none; border-radius:2px; padding:12px; margin-top:12px;
+  }
+  .footer-note{ margin-top:18px; font-size:12px; color:var(--muted); }
+  .modal-overlay{
+    position:fixed; inset:0; background: rgba(33,31,26,0.55);
+    display:flex; align-items:center; justify-content:center; z-index: 50; padding: 16px;
+  }
+  .modal-card{
+    background: var(--paper); border-radius:4px; padding: 28px; width:100%; max-width: 360px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<script>
+/* ============================================================
+   CONFIGURAZIONE
+   ============================================================ */
+
+// Metti qui i valori copiati dalla console Firebase (databaseURL)
+const FIREBASE_DB_URL = "https://ranking-foto-creatografia-default-rtdb.europe-west1.firebasedatabase.app";
+
+// Password per la vista statistiche (cambiala se vuoi)
+const ADMIN_PASSWORD = "crest";
+
+/* ============================================================
+   ELENCO FOTO (percorsi relativi: il file deve stare
+   nella stessa cartella delle foto, direttamente nella
+   root del repository)
+   ============================================================ */
+const PHOTOS = [
+  { id: "001", title: "Neve", url: "./1-neve.jpg" },
+  { id: "002", title: "Neve", url: "./2-neve.jpg" },
+  { id: "003", title: "Neve", url: "./2.1-neve.jpg" },
+  { id: "004", title: "Colline matera", url: "./3-colline%20matera.jpg" },
+  { id: "005", title: "Colline matera", url: "./4-colline%20matera.jpg" },
+  { id: "006", title: "Colline matera", url: "./5-colline%20matera.jpg" },
+  { id: "007", title: "Colline matera", url: "./6-colline%20matera.jpg" },
+  { id: "008", title: "Colline matera", url: "./7-colline%20matera.jpg" },
+  { id: "009", title: "Spieggia puglia", url: "./7.1-spieggia%20puglia" },
+  { id: "010", title: "Amaro", url: "./8-amaro.jpg" },
+  { id: "011", title: "Amaro", url: "./9-amaro.jpg" },
+  { id: "012", title: "Amaro", url: "./10-amaro.jpg" },
+  { id: "013", title: "Amaro", url: "./11-amaro.JPG" },
+  { id: "014", title: "Amaro", url: "./12-amaro.jpg" },
+  { id: "015", title: "Amaro", url: "./13-amaro.jpg" },
+  { id: "016", title: "Traghetto #1", url: "./14-traghetto%20(1).jpg" },
+  { id: "017", title: "Traghetto #2", url: "./14-traghetto%20(2).jpg" },
+  { id: "018", title: "Traghetto #3", url: "./14-traghetto%20(3).jpg" },
+  { id: "019", title: "Matesewide", url: "./15-matesewide.jpg" },
+  { id: "020", title: "Bussola", url: "./16-bussola.jpg" },
+  { id: "021", title: "Csoa #1", url: "./17-csoa%20(1).JPG" },
+  { id: "022", title: "Csoa #2", url: "./17-csoa%20(2).JPG" },
+  { id: "023", title: "Csoa #3", url: "./17-csoa%20(3).JPG" },
+  { id: "024", title: "Csoa #4", url: "./17-csoa%20(4).JPG" },
+  { id: "025", title: "Botanico #1", url: "./18-botanico%20(1).JPG" },
+  { id: "026", title: "Botanico #2", url: "./18-botanico%20(2).JPG" },
+  { id: "027", title: "Botanico #3", url: "./18-botanico%20(3).JPG" },
+  { id: "028", title: "Botanico #4", url: "./18-botanico%20(4).JPG" },
+  { id: "029", title: "Livorno #1", url: "./19-livorno%20(1).jpg" },
+  { id: "030", title: "Livorno #2", url: "./19-livorno%20(2).jpg" },
+  { id: "031", title: "Livorno #3", url: "./19-livorno%20(3).jpg" },
+  { id: "032", title: "Musici firenze #1", url: "./20-musici%20firenze%20(1).jpg" },
+  { id: "033", title: "Musici firenze #2", url: "./20-musici%20firenze%20(2).jpg" },
+  { id: "034", title: "Musici firenze #3", url: "./20-musici%20firenze%20(3).jpg" },
+  { id: "035", title: "Montella #1", url: "./21-montella%20(1).jpg" },
+  { id: "036", title: "Montella #2", url: "./21-montella%20(2).jpg" },
+  { id: "037", title: "Montella #3", url: "./21-montella%20(3).jpg" },
+  { id: "038", title: "Montella #4", url: "./21-montella%20(4).jpg" },
+  { id: "039", title: "Sabbieagri #1", url: "./22-sabbieagri%20(1).jpg" },
+  { id: "040", title: "Sabbieagri #2", url: "./22-sabbieagri%20(2).jpg" },
+  { id: "041", title: "Sabbieagri #3", url: "./22-sabbieagri%20(3).jpg" },
+  { id: "042", title: "Mercatopale #1", url: "./23-mercatopale%20(1).jpg" },
+  { id: "043", title: "Mercatopale #2", url: "./23-mercatopale%20(2).jpg" },
+  { id: "044", title: "Mercatopale #3", url: "./23-mercatopale%20(3).jpg" },
+  { id: "045", title: "Mercatopale #4", url: "./23-mercatopale%20(4).jpg" },
+  { id: "046", title: "Mercatopale #5", url: "./23-mercatopale%20(5).jpg" },
+  { id: "047", title: "Mercatopale #6", url: "./23-mercatopale%20(6).jpg" },
+  { id: "048", title: "Mercatopale #7", url: "./23-mercatopale%20(7).jpg" },
+  { id: "049", title: "Napolistreet #1", url: "./24-napolistreet%20(1).jpg" },
+  { id: "050", title: "Napolistreet #2", url: "./24-napolistreet%20(2).jpg" },
+  { id: "051", title: "Napolistreet #3", url: "./24-napolistreet%20(3).jpg" },
+  { id: "052", title: "Napolistreet #4", url: "./24-napolistreet%20(4).jpg" },
+  { id: "053", title: "Napolistreet #5", url: "./24-napolistreet%20(5).jpg" },
+  { id: "054", title: "Napolistreet #6", url: "./24-napolistreet%20(6).jpg" },
+  { id: "055", title: "Matese1 #1", url: "./25-matese1%20(1).jpg" },
+  { id: "056", title: "Matese1 #2", url: "./25-matese1%20(2).jpg" },
+  { id: "057", title: "Matese1 #3", url: "./25-matese1%20(3).jpg" },
+  { id: "058", title: "Matese1 #4", url: "./25-matese1%20(4).jpg" },
+  { id: "059", title: "Matese1 #5", url: "./25-matese1%20(5).jpg" },
+  { id: "060", title: "Matese1 #6", url: "./25-matese1%20(6).jpg" },
+  { id: "061", title: "Matese1 #7", url: "./25-matese1%20(7).jpg" },
+  { id: "062", title: "Matese1 #8", url: "./25-matese1%20(8).jpg" },
+  { id: "063", title: "Matese1 #9", url: "./25-matese1%20(9).jpg" },
+  { id: "064", title: "Matese1 #10", url: "./25-matese1%20(10).jpg" },
+  { id: "065", title: "Matese1 #11", url: "./25-matese1%20(11).jpg" },
+  { id: "066", title: "Matese1 #12", url: "./25-matese1%20(12).jpg" },
+  { id: "067", title: "Praja #1", url: "./26-praja%20(1).jpg" },
+  { id: "068", title: "Praja #2", url: "./26-praja%20(2).jpg" },
+  { id: "069", title: "Praja #3", url: "./26-praja%20(3).jpg" },
+  { id: "070", title: "Praja #4", url: "./26-praja%20(4).jpg" },
+  { id: "071", title: "Praja #5", url: "./26-praja%20(5).jpg" },
+  { id: "072", title: "Praja #6", url: "./26-praja%20(6).jpg" },
+  { id: "073", title: "Praja #7", url: "./26-praja%20(7).jpg" },
+  { id: "074", title: "Praja #8", url: "./26-praja%20(8).jpg" },
+  { id: "075", title: "Praja #9", url: "./26-praja%20(9).jpg" },
+  { id: "076", title: "Praja #1", url: "./26.1-praja%20(1).jpg" },
+  { id: "077", title: "Praja #2", url: "./26.1-praja%20(2).jpg" },
+  { id: "078", title: "Praja #3", url: "./26.1-praja%20(3).jpg" },
+  { id: "079", title: "Praja #4", url: "./26.1-praja%20(4).jpg" },
+  { id: "080", title: "Massa #1", url: "./27-massa%20(1).jpg" },
+  { id: "081", title: "Massa #2", url: "./27-massa%20(2).jpg" },
+  { id: "082", title: "Massa #3", url: "./27-massa%20(3).jpg" },
+  { id: "083", title: "Massa #4", url: "./27-massa%20(4).jpg" },
+  { id: "084", title: "Massa #5", url: "./27-massa%20(5).jpg" },
+  { id: "085", title: "Amalfi #1", url: "./28-amalfi%20(1).jpg" },
+  { id: "086", title: "Amalfi #2", url: "./28-amalfi%20(2).jpg" },
+  { id: "087", title: "Amalfi #3", url: "./28-amalfi%20(3).jpg" },
+  { id: "088", title: "Amalfi #4", url: "./28-amalfi%20(4).jpg" },
+  { id: "089", title: "Amalfi #5", url: "./28-amalfi%20(5).jpg" },
+  { id: "090", title: "Amalfi #6", url: "./28-amalfi%20(6).jpg" },
+  { id: "091", title: "Amalfi #7", url: "./28-amalfi%20(7).jpg" },
+  { id: "092", title: "Sagata #1", url: "./29-sagata%20(1).jpg" },
+  { id: "093", title: "Sagata #2", url: "./29-sagata%20(2).jpg" },
+  { id: "094", title: "Salto #1", url: "./30-salto%20(1).jpg" },
+  { id: "095", title: "Salto #2", url: "./30-salto%20(2).jpg" },
+  { id: "096", title: "Salto #3", url: "./30-salto%20(3).jpg" },
+  { id: "097", title: "Salto #4", url: "./30-salto%20(4).jpg" },
+  { id: "098", title: "Salto #5", url: "./30-salto%20(5).jpg" },
+  { id: "099", title: "Salto #6", url: "./30-salto%20(6).jpg" },
+  { id: "100", title: "Salto #7", url: "./30-salto%20(7).jpg" },
+  { id: "101", title: "Salto #8", url: "./30-salto%20(8).jpg" },
+  { id: "102", title: "Salto #9", url: "./30-salto%20(9).jpg" },
+  { id: "103", title: "Salto #10", url: "./30-salto%20(10).jpg" },
+  { id: "104", title: "Salto #11", url: "./30-salto(11).jpg" },
+  { id: "105", title: "Matese2 #1", url: "./31-matese2%20(1).jpg" },
+  { id: "106", title: "Matese2 #2", url: "./31-matese2%20(2).jpg" },
+  { id: "107", title: "Matese2 #3", url: "./31-matese2%20(3).jpg" },
+  { id: "108", title: "Matese2 #4", url: "./31-matese2%20(4).jpg" },
+  { id: "109", title: "Adercimar #1", url: "./32-adercimar%20(1).jpg" },
+  { id: "110", title: "Adercimar #2", url: "./32-adercimar%20(2).jpg" },
+  { id: "111", title: "Adercimar #3", url: "./32-adercimar%20(3).jpg" },
+  { id: "112", title: "Adercimar #4", url: "./32-adercimar%20(4).jpg" },
+  { id: "113", title: "Adercimar #5", url: "./32-adercimar%20(5).jpg" },
+  { id: "114", title: "Bestieanimali #1", url: "./33-bestieanimali%20(1).jpg" },
+  { id: "115", title: "Bestieanimali #2", url: "./33-bestieanimali%20(2).jpg" },
+  { id: "116", title: "Bestieanimali #3", url: "./33-bestieanimali%20(3).jpg" },
+  { id: "117", title: "Bestieanimali #4", url: "./33-bestieanimali%20(4).jpg" },
+  { id: "118", title: "Collineirsina #1", url: "./34-collineirsina%20(1).jpg" },
+  { id: "119", title: "Collineirsina #2", url: "./34-collineirsina%20(2).jpg" },
+  { id: "120", title: "Collineirsina #3", url: "./34-collineirsina%20(3).jpg" },
+  { id: "121", title: "Collineirsina #4", url: "./34-collineirsina%20(4).jpg" },
+  { id: "122", title: "Collineirsina #5", url: "./34-collineirsina%20(5).jpg" },
+  { id: "123", title: "Collineirsina #6", url: "./34-collineirsina%20(6).jpg" },
+  { id: "124", title: "Campoli #1", url: "./36-campoli%20(1).JPG" },
+  { id: "125", title: "Campoli #2", url: "./36-campoli%20(2).JPG" },
+  { id: "126", title: "Campoli #3", url: "./36-campoli%20(3).jpg" },
+  { id: "127", title: "Campoli #4", url: "./36-campoli%20(4).JPG" },
+  { id: "128", title: "Campoli #5", url: "./36-campoli%20(5).JPG" },
+  { id: "129", title: "Campoli #6", url: "./36-campoli%20(6).JPG" },
+  { id: "130", title: "Campoli #7", url: "./36-campoli%20(7).jpg" },
+  { id: "131", title: "Campoli #8", url: "./36-campoli%20(8).jpg" },
+  { id: "132", title: "Campoli #9", url: "./36-campoli%20(9).jpg" },
+  { id: "133", title: "Mattmar #1", url: "./37-mattmar%20(1).jpg" },
+  { id: "134", title: "Mattmar #2", url: "./37-mattmar%20(2).jpg" },
+  { id: "135", title: "Mattmar #3", url: "./37-mattmar%20(3).jpg" },
+  { id: "136", title: "Mattmar #4", url: "./37-mattmar%20(4).jpg" },
+  { id: "137", title: "Mattmar #5", url: "./37-mattmar%20(5).jpg" },
+  { id: "138", title: "Mattmar #6", url: "./37-mattmar%20(6).jpg" },
+  { id: "139", title: "Mattmar #7", url: "./37-mattmar%20(7).jpg" },
+  { id: "140", title: "Mattmar #8", url: "./37-mattmar%20(8).jpg" },
+  { id: "141", title: "Mattmar #9", url: "./37-mattmar%20(9).jpg" },
+  { id: "142", title: "Mattmar #10", url: "./37-mattmar%20(10).jpg" },
+  { id: "143", title: "Mattmar #11", url: "./37-mattmar%20(11).jpg" },
+  { id: "144", title: "Mattmar #12", url: "./37-mattmar%20(12).jpg" },
+  { id: "145", title: "Mattmar #13", url: "./37-mattmar%20(13).jpg" },
+  { id: "146", title: "Mattmar #14", url: "./37-mattmar%20(14).jpg" },
+  { id: "147", title: "Mattmar #15", url: "./37-mattmar%20(15).jpg" },
+  { id: "148", title: "Mattmar #16", url: "./37-mattmar%20(16).jpg" },
+  { id: "149", title: "Mattmar #17", url: "./37-mattmar%20(17).jpg" },
+  { id: "150", title: "Mattmar #18", url: "./37-mattmar%20(18).jpg" },
+  { id: "151", title: "Mattmar #19", url: "./37-mattmar%20(19).jpg" },
+  { id: "152", title: "Mattmar #20", url: "./37-mattmar%20(20).jpg" },
+  { id: "153", title: "Mattmar #21", url: "./37-mattmar%20(21).jpg" },
+  { id: "154", title: "Mattmar #22", url: "./37-mattmar%20(22).jpg" },
+  { id: "155", title: "Mattmar #23", url: "./37-mattmar%20(23).jpg" },
+  { id: "156", title: "Mattmar #24", url: "./37-mattmar%20(24).jpg" },
+  { id: "157", title: "Mattmar #25", url: "./37-mattmar%20(25).jpg" },
+  { id: "158", title: "Mattmar #26", url: "./37-mattmar%20(26).jpg" },
+  { id: "159", title: "Montever #1", url: "./38-montever%20(1).jpg" },
+  { id: "160", title: "Montever #2", url: "./38-montever%20(2).jpg" },
+  { id: "161", title: "Montever #3", url: "./38-montever%20(3).jpg" },
+  { id: "162", title: "Montever #4", url: "./38-montever%20(4).jpg" },
+  { id: "163", title: "Montever #5", url: "./38-montever%20(5).jpg" },
+  { id: "164", title: "Montever #6", url: "./38-montever%20(6).jpg" },
+  { id: "165", title: "Montever #7", url: "./38-montever%20(7).jpg" },
+  { id: "166", title: "Montever #8", url: "./38-montever%20(8).jpg" },
+  { id: "167", title: "Montever #9", url: "./38-montever%20(9).jpg" },
+  { id: "168", title: "Ruralarea #1", url: "./39-ruralarea%20(1).jpg" },
+  { id: "169", title: "Ruralarea #2", url: "./39-ruralarea%20(2).jpg" },
+  { id: "170", title: "Ruralarea #3", url: "./39-ruralarea%20(3).jpg" },
+  { id: "171", title: "Ruralarea #4", url: "./39-ruralarea%20(4).jpg" },
+  { id: "172", title: "Ruralarea #5", url: "./39-ruralarea%20(5).jpg" },
+  { id: "173", title: "Ruralarea #6", url: "./39-ruralarea%20(6).jpg" },
+  { id: "174", title: "Ruralarea #7", url: "./39-ruralarea%20(7).jpg" },
+  { id: "175", title: "Ruralarea #8", url: "./39-ruralarea%20(8).jpg" },
+  { id: "176", title: "Ruralarea #9", url: "./39-ruralarea%20(9).jpg" },
+  { id: "177", title: "Ruralarea #10", url: "./39-ruralarea%20(10).jpg" },
+  { id: "178", title: "Taburno #1", url: "./40-taburno%20(1).jpg" },
+  { id: "179", title: "Taburno #2", url: "./40-taburno%20(2).JPG" },
+  { id: "180", title: "Taburno #3", url: "./40-taburno%20(3).jpg" },
+  { id: "181", title: "Taburno #4", url: "./40-taburno%20(4).JPG" },
+  { id: "182", title: "Taburno #5", url: "./40-taburno%20(5).JPG" },
+  { id: "183", title: "Taburno #6", url: "./40-taburno%20(6).jpg" },
+  { id: "184", title: "Taburno #7", url: "./40-taburno%20(7).JPG" },
+  { id: "185", title: "Taburno #8", url: "./40-taburno%20(8).JPG" },
+  { id: "186", title: "Taburno #9", url: "./40-taburno%20(9).jpg" },
+  { id: "187", title: "Taburno #10", url: "./40-taburno%20(10).JPG" },
+  { id: "188", title: "Aremogna #1", url: "./41-aremogna%20(1).jpg" },
+  { id: "189", title: "Aremogna #2", url: "./41-aremogna%20(2).jpg" },
+  { id: "190", title: "Aremogna #3", url: "./41-aremogna%20(3).jpg" },
+  { id: "191", title: "Aremogna #4", url: "./41-aremogna%20(4).jpg" },
+  { id: "192", title: "Aremogna #5", url: "./41-aremogna%20(5).jpg" },
+  { id: "193", title: "Aremogna #6", url: "./41-aremogna%20(6).JPG" },
+  { id: "194", title: "Aremogna #7", url: "./41-aremogna%20(7).jpg" },
+  { id: "195", title: "Aremogna #8", url: "./41-aremogna%20(8).jpg" },
+  { id: "196", title: "Marechia #1", url: "./42-marechia%20(1).jpg" },
+  { id: "197", title: "Marechia #2", url: "./42-marechia%20(2).jpg" },
+  { id: "198", title: "Marechia #3", url: "./42-marechia%20(3).jpg" },
+  { id: "199", title: "Marechia #4", url: "./42-marechia%20(4).jpg" },
+  { id: "200", title: "Marechia #5", url: "./42-marechia%20(5).jpg" },
+  { id: "201", title: "Fusaro #1", url: "./43-fusaro%20(1).jpg" },
+  { id: "202", title: "Fusaro #2", url: "./43-fusaro%20(2).jpg" },
+  { id: "203", title: "Fusaro #3", url: "./43-fusaro%20(3).jpg" },
+  { id: "204", title: "Fusaro #4", url: "./43-fusaro%20(4).jpg" },
+  { id: "205", title: "Fusaro #5", url: "./43-fusaro%20(5).jpg" },
+  { id: "206", title: "Fusaro #6", url: "./43-fusaro%20(6).jpg" },
+  { id: "207", title: "Campoimp #1", url: "./44-campoimp%20(1).jpg" },
+  { id: "208", title: "Campoimp #2", url: "./44-campoimp%20(2).jpg" },
+  { id: "209", title: "Campoimp #3", url: "./44-campoimp%20(3).jpg" },
+  { id: "210", title: "Nice", url: "./45-nice.jpg" },
+  { id: "211", title: "Monet #1", url: "./46-monet%20(1).jpg" },
+  { id: "212", title: "Monet #2", url: "./46-monet%20(2).jpg" },
+  { id: "213", title: "Monet #3", url: "./46-monet%20(3).jpg" },
+  { id: "214", title: "Monet #4", url: "./46-monet%20(4).jpg" },
+  { id: "215", title: "Monet #5", url: "./46-monet%20(5).jpg" },
+  { id: "216", title: "Monet #6", url: "./46-monet%20(6).jpg" },
+  { id: "217", title: "Monet #7", url: "./46-monet%20(7).jpg" },
+  { id: "218", title: "Siene #1", url: "./47-siene%20(1).jpg" },
+  { id: "219", title: "Siene #2", url: "./47-siene%20(2).jpg" },
+  { id: "220", title: "Siene #3", url: "./47-siene%20(3).jpg" },
+  { id: "221", title: "Siene #4", url: "./47-siene%20(4).jpg" },
+  { id: "222", title: "Rocca5miglia #1", url: "./48-rocca5miglia%20(1).JPG" },
+  { id: "223", title: "Rocca5miglia #2", url: "./48-rocca5miglia%20(2).JPG" },
+  { id: "224", title: "Rocca5miglia #3", url: "./48-rocca5miglia%20(3).JPG" },
+  { id: "225", title: "Rocca5miglia #4", url: "./48-rocca5miglia%20(4).JPG" },
+  { id: "226", title: "Rocca5miglia #5", url: "./48-rocca5miglia%20(5).JPG" },
+  { id: "227", title: "Rocca5miglia #6", url: "./48-rocca5miglia%20(6).JPG" },
+  { id: "228", title: "Rocca5miglia #7", url: "./48-rocca5miglia%20(7).JPG" },
+  { id: "229", title: "Rocca5miglia #8", url: "./48-rocca5miglia%20(8).JPG" },
+  { id: "230", title: "Rocca5miglia #9", url: "./48-rocca5miglia%20(9).JPG" },
+  { id: "231", title: "Rocca5miglia #10", url: "./48-rocca5miglia%20(10).JPG" },
+  { id: "232", title: "Rocca5miglia #11", url: "./48-rocca5miglia%20(11).JPG" },
+  { id: "233", title: "Rocca5miglia #12", url: "./48-rocca5miglia%20(12).JPG" },
+  { id: "234", title: "Rocca5miglia #13", url: "./48-rocca5miglia%20(13).JPG" },
+  { id: "235", title: "Rocca5miglia #14", url: "./48-rocca5miglia%20(14).JPG" },
+  { id: "236", title: "Rocca5miglia #15", url: "./48-rocca5miglia%20(15).JPG" },
+  { id: "237", title: "Rocca5miglia #16", url: "./48-rocca5miglia%20(16).JPG" },
+  { id: "238", title: "Rocca5miglia #17", url: "./48-rocca5miglia%20(17).JPG" },
+  { id: "239", title: "Rocca5miglia #18", url: "./48-rocca5miglia%20(18).JPG" },
+  { id: "240", title: "Rocca5miglia #19", url: "./48-rocca5miglia%20(19).JPG" },
+  { id: "241", title: "Rocca5miglia #20", url: "./48-rocca5miglia%20(20).JPG" },
+  { id: "242", title: "Piano5miglia #1", url: "./49-piano5miglia%20(1).JPG" },
+  { id: "243", title: "Piano5miglia #2", url: "./49-piano5miglia%20(2).JPG" },
+  { id: "244", title: "Piano5miglia #3", url: "./49-piano5miglia%20(3).JPG" },
+  { id: "245", title: "Piano5miglia #4", url: "./49-piano5miglia%20(4).JPG" },
+  { id: "246", title: "Piano5miglia #5", url: "./49-piano5miglia%20(5).JPG" },
+  { id: "247", title: "Cimitero #1", url: "./50-cimitero%20(1).JPG" },
+  { id: "248", title: "Cimitero #2", url: "./50-cimitero%20(2).JPG" },
+  { id: "249", title: "Cimitero #3", url: "./50-cimitero%20(3).JPG" },
+  { id: "250", title: "Cimitero #4", url: "./50-cimitero%20(4).JPG" },
+  { id: "251", title: "Cimitero #5", url: "./50-cimitero%20(5).JPG" },
+  { id: "252", title: "Cimitero #6", url: "./50-cimitero%20(6).JPG" },
+  { id: "253", title: "Cimitero #7", url: "./50-cimitero%20(7).JPG" },
+  { id: "254", title: "Cimitero #8", url: "./50-cimitero%20(8).JPG" },
+  { id: "255", title: "Cimitero #9", url: "./50-cimitero%20(9).JPG" },
+  { id: "256", title: "Alfedena #1", url: "./51-alfedena%20(1).JPG" },
+  { id: "257", title: "Alfedena #2", url: "./51-alfedena%20(2).JPG" },
+  { id: "258", title: "Alfedena #3", url: "./51-alfedena%20(3).jpg" },
+  { id: "259", title: "Alfedena #4", url: "./51-alfedena%20(4).JPG" },
+  { id: "260", title: "Alfedena #5", url: "./51-alfedena%20(5).JPG" },
+  { id: "261", title: "Alfedena #6", url: "./51-alfedena%20(6).JPG" },
+  { id: "262", title: "Alfedena #7", url: "./51-alfedena%20(7).jpg" },
+  { id: "263", title: "Alfedena #8", url: "./51-alfedena%20(8).JPG" },
+  { id: "264", title: "Cairano #1", url: "./52-cairano%20(1).jpg" },
+  { id: "265", title: "Cairano #2", url: "./52-cairano%20(2).jpg" },
+  { id: "266", title: "Cairano #3", url: "./52-cairano%20(3).jpg" },
+  { id: "267", title: "Francis", url: "./53-francis.jpg" },
+  { id: "268", title: "Ilford #1", url: "./54-ilford%20(1).jpg" },
+  { id: "269", title: "Ilford #2", url: "./54-ilford%20(2).jpg" },
+  { id: "270", title: "Ilford #3", url: "./54-ilford%20(3).jpg" },
+  { id: "271", title: "Ilford #4", url: "./54-ilford%20(4).jpg" },
+  { id: "272", title: "Ilford #5", url: "./54-ilford%20(5).jpg" },
+  { id: "273", title: "Ilford #6", url: "./54-ilford%20(6).jpg" },
+  { id: "274", title: "Ilford #7", url: "./54-ilford%20(7).jpg" },
+  { id: "275", title: "Ilford #8", url: "./54-ilford%20(8).jpg" },
+  { id: "276", title: "Sicly", url: "./55-sicly.jpg" },
+  { id: "277", title: "Sicly #1", url: "./55-sicly%20(1).jpg" },
+  { id: "278", title: "Sicly #2", url: "./55-sicly%20(2).jpg" },
+  { id: "279", title: "Sicly #3", url: "./55-sicly%20(3).jpg" },
+  { id: "280", title: "Sicly #4", url: "./55-sicly%20(4).jpg" },
+  { id: "281", title: "Sicly #5", url: "./55-sicly%20(5).jpg" },
+  { id: "282", title: "Sicly #6", url: "./55-sicly%20(6).jpg" },
+  { id: "283", title: "Sicly #7", url: "./55-sicly%20(7).jpg" },
+  { id: "284", title: "Sicly #8", url: "./55-sicly%20(8).jpg" },
+  { id: "285", title: "Sicly #9", url: "./55-sicly%20(9).jpg" },
+  { id: "286", title: "Sicly #10", url: "./55-sicly%20(10).jpg" },
+  { id: "287", title: "Sicly #11", url: "./55-sicly%20(11).jpg" },
+  { id: "288", title: "Sicly #12", url: "./55-sicly%20(12).jpg" },
+  { id: "289", title: "Sicly #13", url: "./55-sicly%20(13).jpg" },
+  { id: "290", title: "Sicly #14", url: "./55-sicly%20(14).jpg" },
+  { id: "291", title: "Sicly #15", url: "./55-sicly%20(15).jpg" },
+  { id: "292", title: "Sicly #16", url: "./55-sicly%20(16).jpg" },
+  { id: "293", title: "Milan #1", url: "./56-milan%20(1).jpg" },
+  { id: "294", title: "Milan #2", url: "./56-milan%20(2).jpg" },
+  { id: "295", title: "Milan #3", url: "./56-milan%20(3).jpg" },
+  { id: "296", title: "Milan #4", url: "./56-milan%20(4).jpg" },
+  { id: "297", title: "Milan #5", url: "./56-milan%20(5).jpg" },
+  { id: "298", title: "Milan #6", url: "./56-milan%20(6).jpg" },
+  { id: "299", title: "Milan #7", url: "./56-milan%20(7).jpg" },
+  { id: "300", title: "Milan #8", url: "./56-milan%20(8).jpg" },
+  { id: "301", title: "Milan #9", url: "./56-milan%20(9).jpg" },
+  { id: "302", title: "Milan #10", url: "./56-milan%20(10).jpg" },
+  { id: "303", title: "Milan #11", url: "./56-milan%20(11).jpg" },
+  { id: "304", title: "Milan #12", url: "./56-milan%20(12).jpg" },
+  { id: "305", title: "Milan #13", url: "./56-milan%20(13).jpg" },
+  { id: "306", title: "Milan #14", url: "./56-milan%20(14).jpg" },
+  { id: "307", title: "Milan #15", url: "./56-milan%20(15).jpg" },
+  { id: "308", title: "Tempesta #1", url: "./57-tempesta%20(1).JPG" },
+  { id: "309", title: "Tempesta #2", url: "./57-tempesta%20(2).JPG" },
+  { id: "310", title: "Tempesta #3", url: "./57-tempesta%20(3).JPG" },
+  { id: "311", title: "Tempesta #4", url: "./57-tempesta%20(4).jpg" },
+  { id: "312", title: "Tempesta #5", url: "./57-tempesta%20(5).jpg" },
+  { id: "313", title: "Tempesta #6", url: "./57-tempesta%20(6).jpg" },
+  { id: "314", title: "Tempesta #7", url: "./57-tempesta%20(7).jpg" },
+  { id: "315", title: "Tempesta #8", url: "./57-tempesta%20(8).jpg" },
+  { id: "316", title: "Tempesta #9", url: "./57-tempesta%20(9).JPG" },
+  { id: "317", title: "Sammaro", url: "./58-sammaro.jpg" },
+  { id: "318", title: "Alburni #1", url: "./59-alburni%20(1).jpg" },
+  { id: "319", title: "Alburni #2", url: "./59-alburni%20(2).jpg" },
+  { id: "320", title: "Alburni #3", url: "./59-alburni%20(3).jpg" },
+  { id: "321", title: "Alburni #4", url: "./59-alburni%20(4).jpg" },
+  { id: "322", title: "Alburni #5", url: "./59-alburni%20(5).jpg" },
+  { id: "323", title: "Alburni #6", url: "./59-alburni%20(6).jpg" },
+  { id: "324", title: "Alburni #7", url: "./59-alburni%20(7).jpg" },
+  { id: "325", title: "SDC #1", url: "./60-SDC%20(1).jpg" },
+  { id: "326", title: "SDC #2", url: "./60-SDC%20(2).jpg" },
+  { id: "327", title: "SDC #3", url: "./60-SDC%20(3).jpg" },
+  { id: "328", title: "SDC #4", url: "./60-SDC%20(4).jpg" },
+  { id: "329", title: "SDC #5", url: "./60-SDC%20(5).jpg" },
+  { id: "330", title: "SDC #6", url: "./60-SDC%20(6).jpg" },
+  { id: "331", title: "SDC #7", url: "./60-SDC%20(7).jpg" },
+  { id: "332", title: "SDC #8", url: "./60-SDC%20(8).jpg" },
+  { id: "333", title: "Nebbie #1", url: "./61-nebbie%20(1).jpg" },
+  { id: "334", title: "Nebbie #2", url: "./61-nebbie%20(2).jpg" },
+  { id: "335", title: "Nebbie #3", url: "./61-nebbie%20(3).jpg" },
+  { id: "336", title: "Festival poeasia #1", url: "./62-festival%20poeasia%20(1).jpg" },
+  { id: "337", title: "Festival poeasia #2", url: "./62-festival%20poeasia%20(2).jpg" },
+  { id: "338", title: "Festival poeasia #3", url: "./62-festival%20poeasia%20(3).jpg" },
+  { id: "339", title: "Festival poeasia #4", url: "./62-festival%20poeasia%20(4).jpg" },
+  { id: "340", title: "Festival poeasia #5", url: "./62-festival%20poeasia%20(5).jpg" },
+  { id: "341", title: "Festival poeasia #6", url: "./62-festival%20poeasia%20(6).jpg" },
+  { id: "342", title: "Festival poeasia #7", url: "./62-festival%20poeasia%20(7).jpg" },
+  { id: "343", title: "Festival poeasia #8", url: "./62-festival%20poeasia%20(8).jpg" },
+  { id: "344", title: "Festival poeasia #9", url: "./62-festival%20poeasia%20(9).jpg" },
+  { id: "345", title: "Festival poeasia #10", url: "./62-festival%20poeasia%20(10).jpg" },
+  { id: "346", title: "Festival poeasia #11", url: "./62-festival%20poeasia%20(11).jpg" },
+  { id: "347", title: "Festival poeasia #12", url: "./62-festival%20poeasia%20(12).jpg" },
+  { id: "348", title: "Festival poeasia #13", url: "./62-festival%20poeasia%20(13).jpg" },
+  { id: "349", title: "Festival poeasia #14", url: "./62-festival%20poeasia%20(14).jpg" },
+  { id: "350", title: "Festival poeasia #15", url: "./62-festival%20poeasia%20(15).jpg" },
+  { id: "351", title: "Festival poeasia #16", url: "./62-festival%20poeasia%20(16).jpg" },
+  { id: "352", title: "35mm-kodak #1", url: "./35mm-kodak%20(1).jpg" },
+  { id: "353", title: "35mm-kodak #2", url: "./35mm-kodak%20(2).jpg" },
+  { id: "354", title: "35mm-kodak #3", url: "./35mm-kodak%20(3).jpg" },
+  { id: "355", title: "35mm-kodak #4", url: "./35mm-kodak%20(4).jpg" },
+  { id: "356", title: "35mm-kodak #5", url: "./35mm-kodak%20(5).jpg" },
+  { id: "357", title: "35mm-kodak #6", url: "./35mm-kodak%20(6).jpg" },
+  { id: "358", title: "35mm-kodak #7", url: "./35mm-kodak%20(7).jpg" },
+  { id: "359", title: "35mm-kodak #8", url: "./35mm-kodak%20(8).jpg" },
+  { id: "360", title: "35mm-kodak #9", url: "./35mm-kodak%20(9).jpg" },
+  { id: "361", title: "35mm-kodak #10", url: "./35mm-kodak%20(10).jpg" },
+  { id: "362", title: "35mm-kodak #11", url: "./35mm-kodak%20(11).jpg" },
+  { id: "363", title: "35mm-kodak #12", url: "./35mm-kodak%20(12).jpg" },
+  { id: "364", title: "35mm-kodak #13", url: "./35mm-kodak%20(13).jpg" },
+  { id: "365", title: "35mm-kodak #14", url: "./35mm-kodak%20(14).jpg" }
+];
+
+/* ============================================================ */
+
+const stage = document.getElementById('stage');
+let state = { screen: 'start', name: '', slug: '', scores: {}, index: 0, completed: false };
+
+function slugify(name){
+  return name.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,'-')
+    .replace(/[^a-z0-9\-]/g,'')
+    .slice(0, 60) || 'anonimo';
+}
+
+async function loadVoter(name){
+  const slug = slugify(name);
+  try{
+    const res = await fetch(`${FIREBASE_DB_URL}/voters/${slug}.json`);
+    const data = await res.json();
+    return { slug, data };
+  }catch(e){
+    console.error('Errore caricamento', e);
+    return { slug, data: null };
+  }
+}
+
+async function saveVoter(slug, payload){
+  try{
+    const res = await fetch(`${FIREBASE_DB_URL}/voters/${slug}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return res.ok;
+  }catch(e){
+    console.error('Errore salvataggio', e);
+    return false;
+  }
+}
+
+async function loadAllVoters(){
+  try{
+    const res = await fetch(`${FIREBASE_DB_URL}/voters.json`);
+    const data = await res.json();
+    return data ? Object.values(data) : [];
+  }catch(e){
+    console.error('Errore caricamento statistiche', e);
+    return null; // null = errore, [] = nessun dato
+  }
+}
+
+function render(){
+  if(state.screen === 'start') return renderStart();
+  if(state.screen === 'voting') return renderVoting();
+  if(state.screen === 'review') return renderReview();
+  if(state.screen === 'done') return renderDone();
+  if(state.screen === 'admin-gate') return renderAdminGate();
+  if(state.screen === 'admin') return renderAdmin();
+}
+
+function renderStart(){
+  stage.innerHTML = `
+    <div class="eyebrow"><span>Archivio di stampa</span><span>Nº ${String(PHOTOS.length).padStart(3,'0')} scatti</span></div>
+    <div class="card">
+      <h1>Vota le fotografie</h1>
+      <p class="lede">Scrivi il tuo nome, poi ti verranno mostrate ${PHOTOS.length} fotografie una alla volta.
+      Per ognuna darai un voto da 0 a 100. Alla fine potrai rivedere e correggere tutti i tuoi voti prima di confermarli — e potrai tornare a modificarli anche più avanti.</p>
+      <label class="field-label">Il tuo nome</label>
+      <input type="text" id="nameInput" placeholder="es. Luigi (o Luigi Rossi se conosci più Luigi)" autocomplete="off">
+      <div class="btn-row">
+        <button class="btn" id="startBtn">Inizia a votare</button>
+        <button class="link-btn" id="adminLink" style="margin-left:auto; align-self:center;">Sono io — statistiche</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('startBtn').onclick = onStart;
+  document.getElementById('nameInput').addEventListener('keydown', e=>{ if(e.key==='Enter') onStart(); });
+  document.getElementById('adminLink').onclick = () => { state.screen = 'admin-gate'; render(); };
+}
+
+function renderAdminGate(){
+  stage.innerHTML = `
+    <div class="modal-overlay" id="overlay">
+      <div class="modal-card">
+        <h3>Statistiche</h3>
+        <p class="lede" style="margin-bottom:14px;">Inserisci la password.</p>
+        <input type="password" id="pwInput" placeholder="Password" autocomplete="off">
+        <div class="btn-row">
+          <button class="btn ghost" id="cancelPw">Annulla</button>
+          <button class="btn" id="confirmPw">Entra</button>
+        </div>
+        <div id="pwError" style="display:none; margin-top:12px;" class="banner error">Password errata.</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('cancelPw').onclick = () => { state.screen = 'start'; render(); };
+  const submit = () => {
+    const val = document.getElementById('pwInput').value;
+    if(val === ADMIN_PASSWORD){ state.screen = 'admin'; render(); }
+    else { document.getElementById('pwError').style.display = 'block'; }
+  };
+  document.getElementById('confirmPw').onclick = submit;
+  document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  document.getElementById('pwInput').focus();
+}
+
+async function onStart(){
+  const val = document.getElementById('nameInput').value.trim();
+  if(!val){ document.getElementById('nameInput').focus(); return; }
+  const startBtn = document.getElementById('startBtn');
+  startBtn.disabled = true; startBtn.textContent = 'Un attimo…';
+  const { slug, data } = await loadVoter(val);
+  state.name = data ? data.name : val;
+  state.slug = slug;
+  state.scores = data ? (data.scores || {}) : {};
+  state.completed = data ? !!data.completed : false;
+  if(state.completed){
+    state.screen = 'review';
+  } else {
+    let firstUnvoted = PHOTOS.findIndex(p => state.scores[p.id] === undefined);
+    state.index = firstUnvoted === -1 ? 0 : firstUnvoted;
+    state.screen = 'voting';
+  }
+  render();
+}
+
+function currentScore(photoId){
+  return state.scores[photoId] !== undefined ? state.scores[photoId] : 50;
+}
+
+function renderVoting(){
+  const photo = PHOTOS[state.index];
+  const score = currentScore(photo.id);
+  const isLast = state.index === PHOTOS.length - 1;
+
+  stage.innerHTML = `
+    <div class="eyebrow">
+      <span>${escapeHtml(state.name)}</span>
+      <span>Nº ${String(state.index+1).padStart(3,'0')} / ${String(PHOTOS.length).padStart(3,'0')}</span>
+    </div>
+    <div class="card">
+      <div class="frame-wrap">
+        ${photo.url ? `<img src="${photo.url}" alt="${escapeHtml(photo.title)}" onerror="this.style.display='none'; this.parentElement.innerHTML+='<div class=missing>Immagine non disponibile —<br>controlla il nome del file.</div>'">` : `<div class="missing">Nessun link impostato per questa foto.</div>`}
+      </div>
+      <div class="vote-block"><div class="vote-number" id="voteNum">${score}<span>/100</span></div></div>
+      <input type="range" min="0" max="100" step="1" value="${score}" id="rangeInput">
+      <div class="range-ends"><span>0</span><span>100</span></div>
+      <div class="btn-row spread">
+        <button class="btn ghost" id="backBtn" ${state.index===0 ? 'disabled':''}>← Indietro</button>
+        <button class="btn" id="nextBtn">${isLast ? 'Vai alla revisione →' : 'Avanti →'}</button>
+      </div>
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+  `;
+
+  const range = document.getElementById('rangeInput');
+  const voteNum = document.getElementById('voteNum');
+  range.addEventListener('input', () => { voteNum.innerHTML = range.value + '<span>/100</span>'; });
+
+  document.getElementById('backBtn').onclick = async () => {
+    state.scores[photo.id] = parseInt(range.value, 10);
+    await saveVoter(state.slug, { name: state.name, scores: state.scores, completed: false, updatedAt: new Date().toISOString() });
+    state.index = Math.max(0, state.index - 1);
+    render();
+  };
+  document.getElementById('nextBtn').onclick = async () => {
+    state.scores[photo.id] = parseInt(range.value, 10);
+    await saveVoter(state.slug, { name: state.name, scores: state.scores, completed: false, updatedAt: new Date().toISOString() });
+    if(isLast){ state.screen = 'review'; } else { state.index++; }
+    render();
+  };
+
+  const filmstrip = document.getElementById('filmstrip');
+  filmstrip.innerHTML = PHOTOS.map((p,i)=>{
+    const cls = ['frame-thumb'];
+    if(i===state.index) cls.push('current');
+    if(state.scores[p.id] !== undefined) cls.push('done');
+    return `<div class="${cls.join(' ')}" style="background-image:url('${p.url}')" data-i="${i}">${state.scores[p.id]!==undefined?'<div class="dot"></div>':''}</div>`;
+  }).join('');
+  filmstrip.querySelectorAll('.frame-thumb').forEach(el=>{
+    el.onclick = async () => {
+      state.scores[photo.id] = parseInt(range.value, 10);
+      await saveVoter(state.slug, { name: state.name, scores: state.scores, completed: false, updatedAt: new Date().toISOString() });
+      state.index = parseInt(el.dataset.i, 10);
+      render();
+    };
+  });
+}
+
+function renderReview(){
+  stage.innerHTML = `
+    <div class="eyebrow"><span>${escapeHtml(state.name)}</span><span>Revisione voti</span></div>
+    <div class="card">
+      <h2>Rivedi i tuoi voti</h2>
+      <p class="lede">${state.completed ? 'Hai già confermato i tuoi voti. Puoi comunque modificarli qui sotto in qualsiasi momento.' : 'Controlla i voti dati a ogni fotografia. Puoi correggerli prima di confermare.'}</p>
+      <div id="reviewList"></div>
+      <div class="btn-row spread">
+        <button class="btn ghost" id="backToVoting">← Torna alle foto</button>
+        <button class="btn" id="confirmBtn">${state.completed ? 'Salva modifiche' : 'Conferma tutti i voti'}</button>
+      </div>
+    </div>
+  `;
+  const list = document.getElementById('reviewList');
+  list.innerHTML = PHOTOS.map(p => `
+    <div class="review-row" data-id="${p.id}">
+      <img class="review-thumb" src="${p.url}" alt="">
+      <div class="review-info">
+        <div class="review-title">${escapeHtml(p.title)}</div>
+        <div class="editor-slot"></div>
+      </div>
+      <div class="review-score">${currentScore(p.id)}</div>
+      <button class="review-edit-btn" data-id="${p.id}">Modifica</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.review-edit-btn').forEach(btn=>{
+    btn.onclick = () => {
+      const row = btn.closest('.review-row');
+      const id = btn.dataset.id;
+      const slot = row.querySelector('.editor-slot');
+      if(slot.innerHTML){ slot.innerHTML=''; return; }
+      const val = currentScore(id);
+      slot.innerHTML = `<input type="range" min="0" max="100" step="1" value="${val}" class="inline-editor" data-id="${id}">`;
+      const rangeEl = slot.querySelector('input');
+      const scoreLabel = row.querySelector('.review-score');
+      rangeEl.addEventListener('input', ()=>{ scoreLabel.textContent = rangeEl.value; });
+      rangeEl.addEventListener('change', ()=>{ state.scores[id] = parseInt(rangeEl.value,10); });
+    };
+  });
+
+  document.getElementById('backToVoting').onclick = () => { state.screen = 'voting'; state.index = 0; render(); };
+  document.getElementById('confirmBtn').onclick = async () => {
+    list.querySelectorAll('.inline-editor').forEach(r => { state.scores[r.dataset.id] = parseInt(r.value,10); });
+    const confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.disabled = true; confirmBtn.textContent = 'Salvataggio…';
+    state.completed = true;
+    const ok = await saveVoter(state.slug, { name: state.name, scores: state.scores, completed: true, updatedAt: new Date().toISOString() });
+    if(ok){ state.screen = 'done'; render(); }
+    else {
+      confirmBtn.disabled = false; confirmBtn.textContent = 'Riprova';
+      alert('Non sono riuscito a salvare, controlla la connessione e riprova.');
+    }
+  };
+}
+
+function renderDone(){
+  stage.innerHTML = `
+    <div class="eyebrow"><span>${escapeHtml(state.name)}</span><span>Fatto</span></div>
+    <div class="card">
+      <div class="banner">Voti salvati. Grazie ${escapeHtml(state.name)}!</div>
+      <h2>Hai votato tutte le fotografie</h2>
+      <p class="lede">Puoi chiudere questa pagina, oppure tornare a rivedere o correggere i tuoi voti quando vuoi.</p>
+      <div class="btn-row">
+        <button class="btn ghost" id="reviewAgain">Rivedi i miei voti</button>
+        <button class="btn" id="restartBtn">Torna all'inizio</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('reviewAgain').onclick = () => { state.screen='review'; render(); };
+  document.getElementById('restartBtn').onclick = () => { state = { screen:'start', name:'', slug:'', scores:{}, index:0, completed:false }; render(); };
+}
+
+async function renderAdmin(){
+  stage.innerHTML = `
+    <div class="eyebrow"><span>Statistiche</span><span>solo per te</span></div>
+    <div class="card"><p class="lede">Caricamento voti in corso…</p></div>
+  `;
+  const voters = await loadAllVoters();
+
+  if(voters === null){
+    stage.innerHTML = `
+      <div class="eyebrow"><span>Statistiche</span><span>errore</span></div>
+      <div class="card">
+        <div class="banner error">Non sono riuscito a leggere i dati. Controlla la connessione o le regole del database Firebase.</div>
+        <button class="btn ghost" id="backHome">← Torna all'inizio</button>
+      </div>
+    `;
+    document.getElementById('backHome').onclick = () => { state.screen='start'; render(); };
+    return;
+  }
+
+  const perPhoto = {};
+  PHOTOS.forEach(p => perPhoto[p.id] = { photo: p, scores: [], voters: [] });
+  voters.forEach(v => {
+    PHOTOS.forEach(p => {
+      if(v.scores && v.scores[p.id] !== undefined){
+        perPhoto[p.id].scores.push(v.scores[p.id]);
+        perPhoto[p.id].voters.push(`${v.name}: ${v.scores[p.id]}`);
+      }
+    });
+  });
+
+  const ranking = PHOTOS.map(p => {
+    const entry = perPhoto[p.id];
+    const n = entry.scores.length;
+    const avg = n ? (entry.scores.reduce((a,b)=>a+b,0)/n) : null;
+    return { photo: p, avg, n, voters: entry.voters };
+  }).sort((a,b) => (b.avg ?? -1) - (a.avg ?? -1));
+
+  const completedCount = voters.filter(v=>v.completed).length;
+
+  const rows = ranking.map((r,i) => `
+    <tr>
+      <td class="rank-num">${i+1}</td>
+      <td><img src="${r.photo.url}" alt=""></td>
+      <td>${escapeHtml(r.photo.title)}</td>
+      <td><strong>${r.avg !== null ? r.avg.toFixed(1) : '—'}</strong></td>
+      <td>${r.n}</td>
+      <td class="voters-list">${r.voters.join(' · ') || '—'}</td>
+    </tr>
+  `).join('');
+
+  const csv = ['nome,foto_id,foto_titolo,voto'].concat(
+    voters.flatMap(v => PHOTOS.filter(p=>v.scores && v.scores[p.id]!==undefined)
+      .map(p => `${v.name},${p.id},${p.title.replace(/,/g,' ')},${v.scores[p.id]}`))
+  ).join('\n');
+
+  stage.innerHTML = `
+    <div class="eyebrow"><span>Statistiche</span><span>${voters.length} persone · ${completedCount} hanno confermato</span></div>
+    <div class="card">
+      <h2>Classifica delle tue fotografie</h2>
+      <p class="lede">Media dei voti ricevuti da ${voters.length} persone (${completedCount} hanno confermato tutti i voti, gli altri sono ancora in corso).</p>
+      <div style="overflow-x:auto;">
+        <table class="stats">
+          <thead><tr><th>#</th><th></th><th>Foto</th><th>Media</th><th>Voti</th><th>Dettaglio</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="6">Ancora nessun voto registrato.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <p class="footer-note">Esporta i dati grezzi in CSV (copia e incolla in un foglio di calcolo):</p>
+      <textarea class="csv" readonly onclick="this.select()">${csv}</textarea>
+      <div class="btn-row">
+        <button class="btn ghost" id="backHome">← Torna all'inizio</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('backHome').onclick = () => { state.screen='start'; render(); };
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+render();
+</script>
+</body>
+</html>
